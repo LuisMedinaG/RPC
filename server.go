@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/rpc"
 
@@ -11,106 +12,73 @@ import (
 
 var materias = make(map[string]map[string]float64)
 
-type API struct
+type API struct {
+}
 
-func (this *API) AgregarCalificacion(stu alumno.Alumno, reply *bool) error {
-
-	materia := make(map[string]float64)
-	materia[stu.Materia] = stu.Calificacion
-
-	listSize := len(alumnos)
-
-	if alumno, err := alumnos[stu.Nombre]; err {
-		alumno[stu.Materia] = stu.Calificacion
-		if len(alumno) > listSize {
-			*reply = true
-		}
-	} else {
-		// alumnos[stu.Nombre] = materia
-		if len(alumnos) > listSize {
-			*reply = true
-		}
-		//fmt.Println("Número de alumnos:", len(alumnos))
+func (this *API) AgregarCalificacion(a alumno.Alumno, reply *bool) error {
+	alumno := map[string]float64{
+		a.Nombre: a.Calificacion,
 	}
 
+	if materia, ok := materias[a.Materia]; ok {
+		materia[a.Nombre] = a.Calificacion
+	} else {
+		materias[a.Materia] = alumno
+	}
+
+	*reply = true
 	return nil
 }
 
 func (this *API) MostrarPromedioAlumno(nombre string, reply *float64) error {
-	flag := false
-	// comprobemos que la lista no esté vacía
-	if len(alumnos) > 0 {
-		// comprobemos que haya registros de ese alumno
-		for valor := range alumnos {
-			if valor == nombre {
-				flag = true
+	var numMaterias float64
+	var suma float64
+	for _, materia := range materias {
+		if calificacion, ok := materia[nombre]; ok {
+			suma = suma + calificacion
+			numMaterias += 1
+		}
+	}
+
+	if numMaterias == 0 {
+		return errors.New(fmt.Sprintf("ERROR: Alumno %s no existe", nombre))
+	}
+
+	*reply = suma / numMaterias
+
+	return nil
+}
+
+func (this *API) MostrarPromedioGeneral(_ string, reply *float64) error {
+	if len(materias) > 0 {
+		var suma float64
+		var numAlumnos float64
+		for _, materia := range materias {
+			for _, calificacion := range materia {
+				suma += calificacion
+				numAlumnos += 1
 			}
 		}
-		if flag {
-			// obtenemos el promedio
-			var sumatoria float64
-			for _, cal := range alumnos[nombre] {
-				sumatoria = sumatoria + cal
-			}
-			promedio := sumatoria / float64(len(alumnos[nombre]))
-			*reply = promedio
-		} else {
-			return errors.New("No existe ese alumno")
-		}
+		*reply = suma / numAlumnos
 	} else {
-		return errors.New("No hay elementos registrados")
+		return errors.New("No hay materias registradas")
 	}
 
 	return nil
 }
 
-func (this *API) MostrarPromedioGeneral(promedioGeneral float64, reply *float64) error {
-
-	if len(alumnos) > 0 { // si la lista no está vacía
-		var prom float64
-		numAlumnos := float64(len(alumnos))
-
-		for valor := range alumnos {
-			var sumatoria float64
-			for _, cal := range alumnos[valor] {
-				sumatoria = sumatoria + cal
-			}
-			prom = sumatoria / float64(len(alumnos[valor]))
-			promedioGeneral = promedioGeneral + prom
-		}
-		promedioGeneral = promedioGeneral / numAlumnos
-		*reply = promedioGeneral
-	} else {
-		return errors.New("No hay elementos registrados")
-	}
-
-	return nil
-}
-
-func (this *API) MostrarPromedioMateria(materia string, reply *float64) error {
-
-	if len(alumnos) > 0 {
-		// buscaremos la materia en cada alumno registrado
-		flag := false
-		var sumatoria float64
-		contador := 0
-		for valor := range alumnos {
-			for mat, cal := range alumnos[valor] {
-				if mat == materia {
-					flag = true
-				}
-				if flag {
-					sumatoria = sumatoria + cal
-					contador = contador + 1
-				}
-			}
+func (this *API) MostrarPromedioMateria(titulo string, reply *float64) error {
+	if materia, ok := materias[titulo]; ok {
+		var suma float64
+		var numAlumnos float64
+		for _, calificacion := range materia {
+			suma = suma + calificacion
+			numAlumnos = numAlumnos + 1
 		}
 
-		promedio := sumatoria / float64(contador)
-		*reply = promedio
-
+		*reply = suma / numAlumnos
 	} else {
-		return errors.New("No hay elementos registrados")
+		return errors.New(fmt.Sprintf("ERROR: Materia %s no esta registrda", titulo))
 	}
 
 	return nil
@@ -123,11 +91,13 @@ func main() {
 		log.Fatal("Error registrando API", err)
 	}
 
-	ln, err := net.Listen("tcp", ":8000")
+	fmt.Println("[INFO] API registrada")
+	ln, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		fmt.Println("Error arrancando servidor", err)
 	}
 
+	fmt.Println("[INFO] Arrancando servidor...")
 	for {
 		c, err := ln.Accept()
 		if err != nil {
