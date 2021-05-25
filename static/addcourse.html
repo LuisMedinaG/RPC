@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Agregar Tarea</title>
+</head>
+
+<body>
+    <form action="/tareas" method="POST" id="tareaform">
+        <label>Nombre de la Tarea:</label><br>
+        <input type="text" name="tarea" value="">
+        <input type="submit" value="Enviar">
+    </form>
+
+    <label>Estado:</label>
+    <select name="estado" form="tareaform">
+        <option value="no">No Comenzada</option>
+        <option value="haciendo">Haciendo</option>
+        <option value="terminada">Terminada</option>
+    </select>
+</body>
+
+</html>
