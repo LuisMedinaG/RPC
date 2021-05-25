@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/rpc"
 
-	alumno "./common"
+	alumno "../common"
 )
 
 var materias = make(map[string]map[string]float64)
@@ -15,7 +15,7 @@ var materias = make(map[string]map[string]float64)
 type API struct {
 }
 
-func (this *API) AgregarCalificacion(a alumno.Alumno, reply *bool) error {
+func (api *API) AgregarCalificacion(a alumno.Alumno, reply *bool) error {
 	alumno := map[string]float64{
 		a.Nombre: a.Calificacion,
 	}
@@ -30,7 +30,7 @@ func (this *API) AgregarCalificacion(a alumno.Alumno, reply *bool) error {
 	return nil
 }
 
-func (this *API) MostrarPromedioAlumno(nombre string, reply *float64) error {
+func (api *API) MostrarPromedioAlumno(nombre string, reply *float64) error {
 	var numMaterias float64
 	var suma float64
 	for _, materia := range materias {
@@ -41,7 +41,7 @@ func (this *API) MostrarPromedioAlumno(nombre string, reply *float64) error {
 	}
 
 	if numMaterias == 0 {
-		return errors.New(fmt.Sprintf("ERROR: Alumno %s no existe", nombre))
+		return fmt.Errorf("ERROR: Alumno %s no existe", nombre)
 	}
 
 	*reply = suma / numMaterias
@@ -49,7 +49,7 @@ func (this *API) MostrarPromedioAlumno(nombre string, reply *float64) error {
 	return nil
 }
 
-func (this *API) MostrarPromedioGeneral(_ string, reply *float64) error {
+func (api *API) MostrarPromedioGeneral(_ string, reply *float64) error {
 	if len(materias) > 0 {
 		var suma float64
 		var numAlumnos float64
@@ -61,13 +61,13 @@ func (this *API) MostrarPromedioGeneral(_ string, reply *float64) error {
 		}
 		*reply = suma / numAlumnos
 	} else {
-		return errors.New("No hay materias registradas")
+		return errors.New("no hay materias registradas")
 	}
 
 	return nil
 }
 
-func (this *API) MostrarPromedioMateria(titulo string, reply *float64) error {
+func (api *API) MostrarPromedioMateria(titulo string, reply *float64) error {
 	if materia, ok := materias[titulo]; ok {
 		var suma float64
 		var numAlumnos float64
@@ -78,7 +78,7 @@ func (this *API) MostrarPromedioMateria(titulo string, reply *float64) error {
 
 		*reply = suma / numAlumnos
 	} else {
-		return errors.New(fmt.Sprintf("ERROR: Materia %s no esta registrda", titulo))
+		return fmt.Errorf("ERROR: Materia %s no esta registrda", titulo)
 	}
 
 	return nil

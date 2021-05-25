@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/rpc"
 
-	alumno "./common"
+	alumno "../common"
 )
 
-func client() {
+func main() {
 	c, err := rpc.Dial("tcp", "127.0.0.1:8080")
 	if err != nil {
 		fmt.Println(err)
@@ -16,13 +16,13 @@ func client() {
 
 	var opc int64
 	for {
-		fmt.Println("\n\n\t Menú Cliente\n")
+		fmt.Println("\n\t Menú Cliente\n")
 		fmt.Println("1) Agregar calificación de una materia")
 		fmt.Println("2) Mostrar promedio de un alumno")
 		fmt.Println("3) Mostrar el promedio general")
 		fmt.Println("4) Mostrar el promedio de una materia")
 		fmt.Println("0) SALIR")
-		fmt.Print("-> Opción: ")
+		fmt.Print("Opción: ")
 		fmt.Scanln(&opc)
 
 		switch opc {
@@ -32,21 +32,20 @@ func client() {
 			*/
 			fmt.Println("\n\t Agregar calificación\n")
 
-			// hay que pedir nombre del alumno, materia y calificación
-			var name string
-			var course string
-			var calif float64
-			result := false
+			var nombre string
+			var materia string
+			var calificacion float64
+			var reply bool
 
 			fmt.Print("Nombre: ")
-			fmt.Scanln(&name)
+			fmt.Scanln(&nombre)
 			fmt.Print("Materia: ")
-			fmt.Scanln(&course)
+			fmt.Scanln(&materia)
 			fmt.Print("Calificación: ")
-			fmt.Scanln(&calif)
+			fmt.Scanln(&calificacion)
 
-			a := alumno.Alumno{name, course, calif}
-			err = c.Call("API.AgregarCalificacion", a, &result)
+			a := alumno.Alumno{nombre, materia, calificacion}
+			err = c.Call("API.AgregarCalificacion", a, &reply)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -54,26 +53,20 @@ func client() {
 
 			fmt.Println("INFO: Calificacion agregada exitosamente")
 		case 2:
-			/*
-				Pedir nombre del alumno, invocar por RPC la función para obtener e imprimir el promedio del alumno.
-			*/
 			fmt.Println("\n\t Mostrar promedio de un alumno\n")
 
-			var name string
+			var nombre string
 			var result float64
 			fmt.Print("-> Nombre : ")
-			fmt.Scanln(&name)
+			fmt.Scanln(&nombre)
 
-			err = c.Call("API.MostrarPromedioAlumno", name, &result)
+			err = c.Call("API.MostrarPromedioAlumno", nombre, &result)
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Println("API.MostrarPromedioAlumno =>", "Promedio:", result)
+				fmt.Println("Promedio alumno ", nombre, ":", result)
 			}
 		case 3:
-			/*
-				Invocar por RPC la función Obtener el promedio de todos los alumnos e imprimir el promedio general.
-			*/
 			fmt.Println("\n\t Mostrar promedio general\n")
 
 			var result float64
@@ -81,12 +74,9 @@ func client() {
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Println("API.MostrarPromedioGeneral =>", "Promedio general:", result)
+				fmt.Println("Promedio general:", result)
 			}
 		case 4:
-			/*
-				Invocar por RPC la función Obtener el promedio de todos los alumnos e imprimir el promedio general.
-			*/
 			fmt.Println("\n\t Mostrar promedio de una materia\n")
 
 			var materia string
@@ -98,17 +88,13 @@ func client() {
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Println("API.MostrarPromedioMateria =>", "Promedio de la materia:", result)
+				fmt.Println("Promedio de la materia", materia, ":", result)
 			}
 		case 0:
 			fmt.Println("\n\t Saliendo del programa . . .\n")
 			return
 		default:
-			fmt.Println("\n\t [!] Error, intenta de nuevo. . .\n")
+			fmt.Println("\n\t Error, intenta de nuevo. . .\n")
 		}
 	}
-}
-
-func main() {
-	client()
 }
