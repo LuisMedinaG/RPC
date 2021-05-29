@@ -1,23 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Agregar Tarea</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar calificacion</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+    </style>
+
 </head>
 
 <body>
-    <form action="/tareas" method="POST" id="tareaform">
-        <label>Nombre de la Tarea:</label><br>
-        <input type="text" name="tarea" value="">
-        <input type="submit" value="Enviar">
-    </form>
-
-    <label>Estado:</label>
-    <select name="estado" form="tareaform">
-        <option value="no">No Comenzada</option>
-        <option value="haciendo">Haciendo</option>
-        <option value="terminada">Terminada</option>
-    </select>
+    <div class="p-5 d-flex align-items-center">
+        <div class="col-3 container">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Registrar calificacion</h5>
+                    <form action="/agregar" method="POST" id="agregarCalif">
+                        <div class="form-group">
+                            <label for="nombre">Alumno:</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control"
+                                aria-describedby="Nombre del alumno">
+                        </div>
+                        <div class="form-group">
+                            <label for="materia">Materia:</label>
+                            <input type="text" id="materia" name="materia" class="form-control"
+                                aria-describedby="Titulo de la materia">
+                        </div>
+                        <div class="form-group">
+                        </div>
+                        <div class="form-group">
+                            <label for="calif">Calificacion:</label>
+                            <input type="number" id="calif" name="calif" min="0" max="10" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

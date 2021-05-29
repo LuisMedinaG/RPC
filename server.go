@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	alumno "./common"
 )
@@ -116,28 +117,62 @@ func cargarHtml(a string) string {
 	return string(html)
 }
 
-func form(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set(
-		"Content-Type",
-		"text/html",
-	)
-	fmt.Fprintf(
-		res,
-		cargarHtml("static/addcourse.html"),
-	)
+type Tarea struct {
+	Nombre string
+	Estado string
+}
+
+type AdminTareas struct {
+	Tareas []Tarea
+}
+
+var misTareas AdminTareas
+
+func (tareas *AdminTareas) Agregar(tarea Tarea) {
+	tareas.Tareas = append(tareas.Tareas, tarea)
+}
+
+func (tareas *AdminTareas) String() string {
+	var html string
+	for _, tarea := range tareas.Tareas {
+		html += "<tr>" +
+			"<td>" + tarea.Nombre + "</td>" +
+			"<td>" + tarea.Estado + "</td>" +
+			"</tr>"
+	}
+	return html
+}
+
+func agregar(res http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case "GET":
+		res.Header().Set(
+			"Content-Type",
+			"text/html",
+		)
+		fmt.Fprintf(
+			res,
+			cargarHtml("static/addcourse.html"),
+		)
+
+	case "POST":
+		if err := req.ParseForm(); err != nil {
+			fmt.Fprintf(res, "ParseForm() error %v", err)
+			return
+		}
+		nombre := req.FormValue("nombre")
+		materia := req.FormValue("materia")
+		calif, _ := strconv.ParseFloat(req.FormValue("calif"), 64)
+
+		alumno := alumno.Alumno{Nombre: nombre, Materia: materia, Calificacion: calif}
+		fmt.Println(alumno)
+		fmt.Println(materias)
+
+		// AgregarCalificacion(alumno)
+	}
 }
 
 func main() {
-	fileServer := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fileServer)
-
-	http.HandleFunc("/form", form)
-
-	fmt.Printf("Starting server at http://localhost:8080/\n")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
-	}
-
 	// api := new(API)
 	// err := rpc.Register(api)
 	// if err != nil {
@@ -160,4 +195,14 @@ func main() {
 
 	// 	go rpc.ServeConn(c)
 	// }
+
+	fileServer := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fileServer)
+
+	http.HandleFunc("/agregar", agregar)
+
+	fmt.Printf("Starting server at http://localhost:8080/\n")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 }
