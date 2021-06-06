@@ -7,16 +7,20 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	alumno "./common"
 )
+
+type Alumno struct {
+	Nombre       string
+	Materia      string
+	Calificacion float64
+}
 
 var materias = make(map[string]map[string]float64)
 
 type API struct {
 }
 
-func (api *API) AgregarCalificacion(a alumno.Alumno, reply *bool) error {
+func (api *API) AgregarCalificacion(a Alumno, reply *bool) error {
 	alumno := map[string]float64{
 		a.Nombre: a.Calificacion,
 	}
