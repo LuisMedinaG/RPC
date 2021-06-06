@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"net/rpc"
-
-	alumno "../common"
 )
+
+type Alumno struct {
+	Nombre       string
+	Materia      string
+	Calificacion float64
+}
 
 func main() {
 	c, err := rpc.Dial("tcp", "127.0.0.1:8080")
@@ -44,7 +48,7 @@ func main() {
 			fmt.Print("Calificación: ")
 			fmt.Scanln(&calificacion)
 
-			a := alumno.Alumno{nombre, materia, calificacion}
+			a := Alumno{nombre, materia, calificacion}
 			err = c.Call("API.AgregarCalificacion", a, &reply)
 			if err != nil {
 				fmt.Println(err)
