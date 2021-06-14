@@ -156,7 +156,7 @@ func agregar(res http.ResponseWriter, req *http.Request) {
 		)
 		fmt.Fprintf(
 			res,
-			cargarHtml("static/addcourse.html"),
+			cargarHtml("static/agregar.html"),
 		)
 
 	case "POST":
@@ -168,9 +168,20 @@ func agregar(res http.ResponseWriter, req *http.Request) {
 		materia := req.FormValue("materia")
 		calif, _ := strconv.ParseFloat(req.FormValue("calif"), 64)
 
-		alumno := alumno.Alumno{Nombre: nombre, Materia: materia, Calificacion: calif}
+		alumno := Alumno{Nombre: nombre, Materia: materia, Calificacion: calif}
 		fmt.Println(alumno)
 		fmt.Println(materias)
+
+		res.Header().Set(
+			"Content-Type",
+			"text/html",
+		)
+		fmt.Fprintf(
+			res,
+			cargarHtml("static/respuesta.html"),
+			nombre,
+			materia,
+		)
 
 		// AgregarCalificacion(alumno)
 	}
@@ -200,8 +211,8 @@ func main() {
 	// 	go rpc.ServeConn(c)
 	// }
 
-	fileServer := http.FileServer(http.Dir("./static"))
-	http.Handle("/", fileServer)
+	// fileServer := http.FileServer(http.Dir("./static"))
+	// http.Handle("/", fileServer)
 
 	http.HandleFunc("/agregar", agregar)
 
